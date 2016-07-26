@@ -43,6 +43,8 @@ initModel =
   , drag     = Nothing
   , axis     = Both
   , grid     = Nothing
+  , min      = 0
+  , max      = 0
   }
 
 init : (Model, Cmd Msg)
@@ -164,30 +166,23 @@ view : Model -> Html Msg
 view model =
     div [ on "mousedown" (Json.map DragStart Mouse.position)
         , cursorStyle model
-        ]
-        [ text "test1" ]
+        , class "slider__cursor"
+        ] []
 
 
 (=>) = (,)
 
 intToPxStr : Int -> String
 intToPxStr n =
-    toString n ++ "px"
+  toString n ++ "px"
 
 cursorStyle : Model -> Attribute msg
 cursorStyle ({ position, drag } as model) =
-    let
-      { x, y } =
-        getPosition model
-    in
-        style
-            [ "width" => "140px"
-            , "height" => "140px"
-            , "borderRadius" => "6px"
-            , "backgroundColor" => "rgb(76, 103, 194)"
-            , "transform" => ("translate3d(" ++ (intToPxStr x) ++ "," ++ (intToPxStr y) ++ ",0)")
-            , "cursor" => "pointer"
-            , "color" => "white"
-            , "textAlign" => "center"
-            , "lineHeight" => "140px"
-            ]
+  let
+    { x, y } =
+      getPosition model
+  in
+    style
+      [ "transform" => ("translate3d(" ++ (intToPxStr x) ++ "," ++ (intToPxStr y) ++ ",0)")
+      , "cursor" => "pointer"
+      ]
