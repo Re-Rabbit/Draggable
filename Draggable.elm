@@ -1,4 +1,4 @@
-port module Draggable.Draggable exposing (..)
+module Draggable.Draggable exposing (..)
 
 
 import Html exposing (..)
@@ -7,6 +7,7 @@ import Html.Attributes exposing (..)
 import Html.App as App
 import Mouse exposing (Position)
 import Json.Decode as Json
+
 
 
 main =
@@ -18,12 +19,20 @@ main =
     }
 
 
+
 -- MODEL
 
 type Axis
   = Both
   | X
   | Y
+
+type alias Scope =
+  { minX : Maybe Int
+  , maxX : Maybe Int
+  , minY : Maybe Int
+  , maxY : Maybe Int
+  }
 
 type alias Drag =
   { start : Position
@@ -35,6 +44,16 @@ type alias Model =
   , drag     : Maybe Drag
   , axis     : Axis
   , grid     : Maybe Int
+  , scope    : Scope
+  }
+
+
+initScope : Scope
+initScope =
+  { minX = Nothing
+  , maxX = Nothing
+  , minY = Nothing
+  , maxY = Nothing
   }
 
 initModel : Model
@@ -43,8 +62,7 @@ initModel =
   , drag     = Nothing
   , axis     = Both
   , grid     = Nothing
-  , min      = 0
-  , max      = 0
+  , scope    = initScope
   }
 
 init : (Model, Cmd Msg)
@@ -111,7 +129,7 @@ update msg ({ position, drag } as model) =
 
 
 getPosition : Model -> Position
-getPosition { position, drag, axis, grid } =
+getPosition { position, drag, axis, grid, scope } =
   case drag of
     Nothing ->
       position
@@ -146,6 +164,13 @@ getPosition { position, drag, axis, grid } =
             Position position.x positionY
           _ ->
             Position positionX positionY
+
+
+valueInScope : Axis -> Scope -> Int -> Int
+valueInScope axis scope val =
+  case axis of
+    X ->
+    Y ->
 
 
 -- SUBSCRITIONS
