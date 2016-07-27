@@ -4,19 +4,8 @@ module Draggable.Draggable exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
-import Html.App as App
 import Mouse exposing (Position)
 import Json.Decode as Json
-
-
-
-main =
-  App.program
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
 
 
 
@@ -156,21 +145,31 @@ getPosition { position, drag, axis, grid, scope } =
               ( position.x + stepGrow relativeX grid'
               , position.y + stepGrow relativeY grid'
               )
+        scopeVal =
+          valueInScope scope
       in
         case axis of
           X ->
-            Position positionX position.y
+            Position (scopeVal X positionX) position.y
           Y ->
-            Position position.x positionY
+            Position position.x (scopeVal Y positionY)
           _ ->
-            Position positionX positionY
+            Position (scopeVal X positionX) (scopeVal Y positionY)
 
 
-valueInScope : Axis -> Scope -> Int -> Int
-valueInScope axis scope val =
-  case axis of
-    X ->
-    Y ->
+valueInScope : Scope -> Axis -> Int -> Int
+valueInScope { minX, minY, maxX, maxY } axis val =
+  let
+    defaultVal cmp =
+      Maybe.withDefault val cmp
+  in
+    case axis of
+      X ->
+        clamp (defaultVal minX) (defaultVal maxX) val
+      Y ->
+        clamp (defaultVal minY) (defaultVal maxY) val
+      _ ->
+        val
 
 
 -- SUBSCRITIONS
@@ -187,12 +186,17 @@ subscriptions { drag } =
         ]
 
 
-view : Model -> Html Msg
-view model =
-    div [ on "mousedown" (Json.map DragStart Mouse.position)
+view : List (Attribute Msg) -> Model -> Html Msg
+view attrs model =
+    let
+      draggableAttrs =
+        [ on "mousedown" (Json.map DragStart Mouse.position)
         , cursorStyle model
-        , class "slider__cursor"
-        ] []
+        ]
+      view' =
+        div (attrs ++ draggableAttrs) []
+    in
+      view'
 
 
 (=>) = (,)
