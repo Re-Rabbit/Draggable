@@ -1,6 +1,13 @@
 module Draggable.Draggable exposing (..)
 
 
+{-| Draggable Component.
+
+@TODO add the current value
+
+-}
+
+
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
@@ -10,6 +17,10 @@ import Json.Decode as Json
 
 
 -- MODEL
+
+type State
+  = Dragged
+  | Dragging Int
 
 type Axis
   = Both
@@ -34,8 +45,8 @@ type alias Model =
   , axis     : Axis
   , grid     : Maybe Int
   , scope    : Scope
+  , state    : State
   }
-
 
 initScope : Scope
 initScope =
@@ -52,6 +63,7 @@ initModel =
   , axis     = Both
   , grid     = Nothing
   , scope    = initScope
+  , state    = Dragged
   }
 
 init : (Model, Cmd Msg)
@@ -71,8 +83,10 @@ type Msg
   | SetAxis Axis
   | SetGrid (Maybe Int)
 
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({ position, drag } as model) =
+
   case msg of
     DragStart position ->
       ( { model | drag = Just <| Drag position position }
@@ -174,16 +188,21 @@ valueInScope { minX, minY, maxX, maxY } axis val =
 
 -- SUBSCRITIONS
 
+
 subscriptions : Model -> Sub Msg
 subscriptions { drag } =
   case drag of
-    Nothing ->
-      Sub.none
     Just _ ->
       Sub.batch
         [ Mouse.moves DragMove
         , Mouse.ups DragEnd
         ]
+    Nothing ->
+      Sub.none
+
+
+
+-- VIEW
 
 
 view : List (Attribute Msg) -> Model -> Html Msg
